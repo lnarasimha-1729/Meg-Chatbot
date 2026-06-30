@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Megh One AI · NLP Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --p-50:#FBF7FF; --p-100:#F4EBFC; --p-200:#E5D2F6; --p-300:#CFA8EE;
+    --p-400:#B27FE0; --p-500:#9558CF; --p-600:#7C3FBF; --p-700:#5C2D91;
+    --p-800:#3E1F66; --p-900:#241038;
+    --ink:#1A1626; --ink-1:#1A1626; --ink-2:#534B68; --ink-3:#857E96; --line:#E8DEF4;
+    --bg:#FAF9FC; --surface:#FFFFFF; --hover:#F4EBFC;
+    --teal:#0F766E; --teal-bg:#D6F0EC;
+    --amber:#9A6700; --amber-bg:#FBF0DE;
+    --green:#15803D; --green-bg:#DCFCE7;
+    --red:#B91C1C; --red-bg:#FEE2E2;
+    --pink:#9D174D; --pink-bg:#FCE7F3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.5;
+    overflow: hidden;
+  }
+  .mono { font-family: 'JetBrains Mono', Menlo, monospace; }
+
+  /* ============== APP LAYOUT ============== */
+  .app { display: grid; grid-template-columns: 260px 1fr; height: 100vh; height: 100dvh; }
+
+  /* ============== SIDEBAR ============== */
+  .sidebar {
+    background: linear-gradient(180deg, var(--p-900) 0%, var(--p-800) 100%);
+    color: white; display: flex; flex-direction: column;
+    border-right: 1px solid var(--p-900); overflow-y: auto;
+  }
+
+  /* Hamburger (mobile only) + drawer backdrop — hidden on desktop */
+  .menu-btn { display: none; }
+  .sidebar-backdrop { display: none; }
+  .brand {
+    padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .brand-logo {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, #C586D7 0%, #7C3FBF 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: white;
+  }
+  .brand-name { font-weight: 600; font-size: 15px; }
+  .brand-sub { font-size: 10.5px; color: rgba(255,255,255,0.6); }
+
+  .nav-section { padding: 14px 12px 6px; font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 1px; color: rgba(255,255,255,0.5); font-weight: 600; }
+  .nav-item {
+    padding: 8px 12px; margin: 1px 8px; border-radius: 6px; cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13.5px; color: rgba(255,255,255,0.88); transition: background .15s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.08); }
+  .nav-item.active { background: rgba(197,134,215,0.18); color: white; }
+  .nav-item .icon { width: 16px; height: 16px; opacity: 0.85; flex-shrink: 0; }
+  .nav-item .count {
+    margin-left: auto; background: rgba(255,255,255,0.12); padding: 1px 6px;
+    border-radius: 8px; font-size: 10.5px; font-weight: 600;
+  }
+  .sidebar-foot {
+    margin-top: auto; padding: 12px; border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 11px; color: rgba(255,255,255,0.5);
+  }
+  .user-chip {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+    border-radius: 8px; background: rgba(255,255,255,0.06);
+  }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, #B27FE0, #5C2D91);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 11.5px; color: white;
+  }
+
+  /* ============== MAIN AREA ============== */
+  .main { display: flex; flex-direction: column; min-width: 0; height: 100vh; min-height: 0; overflow: hidden; }
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    padding: 14px 24px; display: flex; align-items: center; gap: 16px;
+  }
+  .scheme-switch {
+    display: flex; gap: 4px; background: var(--p-50);
+    padding: 4px; border-radius: 10px;
+  }
+  .scheme-chip {
+    padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+    color: var(--ink-2); cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .scheme-chip:hover { background: rgba(124,63,191,0.1); color: var(--p-700); }
+  .scheme-chip.active {
+    background: var(--surface); color: var(--p-700);
+    box-shadow: 0 1px 3px rgba(62,31,102,0.12);
+  }
+  .scheme-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--p-400); }
+  .scheme-chip.active .dot { background: var(--p-700); }
+  .topbar .date-pill { font-size: 12px; color: var(--ink-3); font-weight: 500; }
+  .topbar .actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .icon-btn {
+    width: 34px; height: 34px; border-radius: 8px; background: transparent;
+    border: 1px solid var(--line); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--ink-2); transition: all .15s;
+  }
+  .icon-btn:hover { background: var(--p-50); color: var(--p-700); border-color: var(--p-200); }
+
+  /* ============== CHAT AREA ============== */
+  .chat-area {
+    flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; padding: 0;
+    min-height: 0;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--p-50) 100%);
+  }
+  .chat-inner { max-width: 920px; margin: 0 auto; padding: 32px 24px 200px; }
+
+  /* HERO */
+  .hero { text-align: center; padding: 32px 0 24px; }
+  .hero-eyebrow {
+    display: inline-block; padding: 4px 10px; border-radius: 12px;
+    background: var(--p-100); color: var(--p-700); font-size: 11px;
+    font-weight: 600; letter-spacing: 0.5px; margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: 30px; font-weight: 700; margin: 0 0 8px;
+    background: linear-gradient(135deg, var(--p-800), var(--p-500));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p { color: var(--ink-2); font-size: 14.5px; margin: 0; max-width: 620px; margin-inline: auto; }
+
+  /* SCHEME CARDS */
+  .scheme-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 28px 0; }
+  @media (max-width: 980px) { .scheme-cards { grid-template-columns: 1fr; } }
+  .scheme-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px; transition: all .2s; cursor: pointer;
+  }
+  .scheme-card:hover {
+    border-color: var(--p-300); transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(62,31,102,0.08);
+  }
+  .scheme-card.selected {
+    border-color: var(--p-500);
+    box-shadow: 0 0 0 2px var(--p-300), 0 10px 24px rgba(62,31,102,0.12);
+  }
+  .scheme-card.focus-card  { background: linear-gradient(135deg, #FBF7FF 0%, #F4EBFC 100%); }
+  .scheme-card.unified-card { background: linear-gradient(135deg, #F0FDFA 0%, #D6F0EC 100%); }
+  .scheme-card.elevate-card { background: linear-gradient(135deg, #FFFBEB 0%, #FBF0DE 100%); }
+  .scheme-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .scheme-card .ico {
+    width: 36px; height: 36px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 18px;
+  }
+  .focus-card .ico   { background: var(--p-200); color: var(--p-700); }
+  .unified-card .ico { background: var(--teal-bg); color: var(--teal); }
+  .elevate-card .ico { background: var(--amber-bg); color: var(--amber); }
+  .scheme-card h3 { margin: 0; font-size: 15px; font-weight: 700; color: var(--ink); }
+  .scheme-card .meta { font-size: 11.5px; color: var(--ink-3); font-weight: 500; }
+  .scheme-card .stats { display: flex; gap: 16px; margin-top: 12px; }
+  .scheme-card .stat-val { font-size: 17px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .scheme-card .stat-lbl { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.5px; }
+  .focus-card .stat-val   { color: var(--p-700); }
+  .unified-card .stat-val { color: var(--teal); }
+  .elevate-card .stat-val { color: var(--amber); }
+
+  /* PROMPT CHIPS */
+  .prompts-section { margin: 22px 0 12px; }
+  .prompts-title { font-size: 12px; font-weight: 600; color: var(--ink-3);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .prompt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  @media (max-width: 720px) { .prompt-grid { grid-template-columns: 1fr; } }
+  .prompt {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; gap: 10px; text-align: left;
+  }
+  .prompt:hover { border-color: var(--p-300); background: var(--p-50); }
+  .prompt .ic { font-size: 16px; flex-shrink: 0; opacity: 0.7; }
+  .prompt-text { font-size: 13.5px; color: var(--ink); }
+
+  /* MESSAGES */
+  .message-group { margin-bottom: 18px; }
+  .msg { display: flex; gap: 12px; padding: 14px 0; animation: fadeUp .25s ease-out; }
+  .msg.user { flex-direction: row; }
+  .av {
+    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .msg.user .av { background: var(--ink); color: white; }
+  .msg.bot .av { background: linear-gradient(135deg, var(--p-500), var(--p-700)); color: white; }
+  .msg > div:last-child { flex: 1; min-width: 0; }
+  .bubble {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 16px; font-size: 14px; color: var(--ink);
+  }
+  .msg.user .bubble { background: var(--p-700); color: #fff; border-color: var(--p-700); }
+  .bubble strong, .bubble b { color: var(--p-700); font-weight: 700; }
+  .msg.user .bubble strong { color: #fff; }
+  .answer-text { margin-bottom: 4px; }
+  .mtime { font-size: 11px; color: var(--ink-3); margin-top: 4px; }
+
+  /* Typing indicator */
+  .typing-bubble { display: inline-flex; gap: 4px; padding: 12px 16px; }
+  .typing-bubble .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--p-400);
+    animation: typing 1.2s infinite ease-in-out;
+  }
+  .typing-bubble .dot:nth-child(2) { animation-delay: 0.15s; }
+  .typing-bubble .dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============== ANALYTICS (charts + tables) ============== */
+  .analytics { margin-top: 12px; }
+  .dyn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 12px; }
+  .dyn-grid.single { grid-template-columns: 1fr; }
+  .dyn-chart-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .chd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .chd-left { display: flex; align-items: center; gap: 8px; }
+  .chd-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--p-500); }
+  .chd-title { font-size: 12px; font-weight: 600; color: var(--ink-2); text-transform: capitalize; }
+  .chd-pill { font-size: 10px; background: var(--p-100); color: var(--p-700); padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+  .chw { position: relative; height: 220px; }
+  .qctog { display: flex; gap: 2px; background: var(--p-50); border-radius: 7px; padding: 2px; }
+  .ctb { border: 0; background: transparent; font: inherit; font-size: 11px; font-weight: 600;
+    color: var(--ink-3); padding: 4px 9px; border-radius: 5px; cursor: pointer; }
+  .ctb.on { background: var(--surface); color: var(--p-700); box-shadow: 0 1px 2px rgba(62,31,102,.12); }
+
+  .rtwrap { background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    overflow: auto; max-height: 420px; margin-top: 12px; }
+  .rtbl { width: 100%; border-collapse: collapse; }
+  .rtbl th { background: var(--p-50); color: var(--p-700); font-weight: 600; text-align: left;
+    padding: 9px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--line); position: sticky; top: 0; }
+  .rtbl td { padding: 9px 12px; font-size: 13px; border-bottom: 1px solid var(--p-50); }
+  .rtbl tr:last-child td { border-bottom: none; }
+  .rtbl tr:hover td { background: var(--p-50); }
+  .rtbl.record-card th { text-transform: capitalize; background: var(--p-50); position: static; }
+  .rtbl-note { font-size: 11px; color: var(--ink-3); padding: 8px 12px; font-style: italic; }
+
+  /* ===== Follow-up "Next step" + sources ===== */
+  .next-step {
+    margin-top: 14px; padding: 12px 16px; border-left: 3px solid var(--p-500);
+    background: linear-gradient(135deg, var(--p-50) 0%, var(--p-100) 100%);
+    border-radius: 0 10px 10px 0; cursor: pointer; transition: background .15s;
+  }
+  .next-step:hover { background: linear-gradient(135deg, var(--p-100) 0%, var(--p-200) 100%); }
+  .next-step-label { font-size: 10.5px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--p-700); margin-bottom: 4px; }
+  .next-step-text { font-size: 13.5px; font-style: italic; color: var(--ink-1); }
+  .ans-sources {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+    margin-top: 10px; font-size: 12px; color: var(--ink-3);
+  }
+  .ans-sources .src-lbl { font-weight: 500; }
+  .ans-sources .src-chip {
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    color: var(--p-700); background: var(--p-50); padding: 2px 8px; border-radius: 5px;
+  }
+
+  /* ============== SQL QUERY BLOCK (Generate SQL Query button) ============== */
+  .sql-block { margin-top: 12px; }
+  .sql-toggle-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 14px; background: var(--p-50); border: 1px solid var(--line);
+    border-radius: 9px; color: var(--p-700); font-family: inherit;
+    font-size: 12.5px; font-weight: 700; letter-spacing: 0.3px;
+    cursor: pointer; transition: all .18s;
+  }
+  .sql-toggle-btn:hover { background: var(--p-700); color: #fff; border-color: var(--p-700); }
+  .sql-toggle-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .sql-code-wrap {
+    display: none; margin-top: 10px; border: 1px solid var(--line);
+    border-radius: 10px; overflow: hidden;
+  }
+  .sql-code-wrap.open { display: block; }
+  .sql-code-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 14px; background: var(--p-800); color: #fff;
+  }
+  .sql-code-head span { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .sql-copy-btn {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22);
+    color: #fff; border-radius: 6px; padding: 4px 10px;
+    font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all .15s;
+  }
+  .sql-copy-btn:hover { background: rgba(255,255,255,0.22); }
+  .sql-code {
+    margin: 0; padding: 14px; background: var(--p-900); color: #E5D2F6;
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word; overflow-x: auto;
+  }
+
+  /* ============== COMPOSER ============== */
+  .composer-wrap {
+    position: fixed; bottom: 0; left: 260px; right: 0;
+    padding: 16px 24px 20px; background: linear-gradient(180deg, transparent 0%, var(--p-50) 30%);
+  }
+  @media (max-width: 880px) { .composer-wrap { left: 0; } }
+  .composer-inner { max-width: 920px; margin: 0 auto; }
+  .composer {
+    background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(62,31,102,0.08);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .composer:focus-within { border-color: var(--p-400); box-shadow: 0 4px 24px rgba(124,63,191,0.18); }
+  .composer-input {
+    border: 0; outline: 0; width: 100%; padding: 14px 18px;
+    background: transparent; font-family: inherit; font-size: 14.5px;
+    resize: none; color: var(--ink); min-height: 50px; max-height: 160px;
+  }
+  .composer-bar {
+    padding: 8px 12px 10px; display: flex; gap: 6px; align-items: center;
+    border-top: 1px solid var(--p-50);
+  }
+  .pill-btn {
+    background: transparent; border: 1px solid var(--line); border-radius: 18px;
+    padding: 5px 11px; font-size: 11.5px; color: var(--ink-2); cursor: pointer;
+    transition: all .15s; font-weight: 500; display: flex; align-items: center; gap: 4px;
+  }
+  .pill-btn:hover { background: var(--p-50); border-color: var(--p-200); color: var(--p-700); }
+  .pill-btn .ico { font-size: 13px; display: flex; }
+  .send-btn {
+    margin-left: auto;
+    background: linear-gradient(135deg, var(--p-600), var(--p-700));
+    color: white; border: 0; padding: 8px 16px; border-radius: 9px;
+    font-weight: 600; font-size: 13px; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(124,63,191,0.3); transition: all .15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .send-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(124,63,191,0.4); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .composer-hint { text-align: center; font-size: 10.5px; color: var(--ink-3); margin-top: 8px; }
+  .composer-hint .kbd {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    padding: 1px 5px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-2);
+  }
+  .lang-tabs { display: flex; gap: 2px; background: var(--p-50); border-radius: 8px; padding: 2px; }
+  .lang-tab { border: 0; background: transparent; font: inherit; font-size: 11px; font-weight: 600;
+    color: var(--ink-3); padding: 4px 9px; border-radius: 6px; cursor: pointer; }
+  .lang-tab.active { background: var(--surface); color: var(--p-700); box-shadow: 0 1px 2px rgba(62,31,102,.12); }
+
+  /* Scrollbar */
+  .chat-area::-webkit-scrollbar, .sidebar::-webkit-scrollbar { width: 8px; }
+  .chat-area::-webkit-scrollbar-thumb { background: var(--p-200); border-radius: 4px; }
+  .chat-area::-webkit-scrollbar-thumb:hover { background: var(--p-300); }
+
+  /* Scroll-to-top button */
+  .scroll-top {
+    position: fixed; bottom: 130px; right: 28px; width: 38px; height: 38px;
+    border-radius: 50%; background: var(--p-700); color: #fff; border: 0; cursor: pointer;
+    display: none; align-items: center; justify-content: center; z-index: 50;
+    box-shadow: 0 4px 12px rgba(62,31,102,.35);
+  }
+  .scroll-top.show { display: flex; }
+
+  /* ===== Modal (Recent / Glossary / Use cases) ===== */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(20, 12, 40, 0.55);
+    backdrop-filter: blur(4px); z-index: 100;
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal-card {
+    background: #ffffff; width: min(720px, 92vw); max-height: 80vh;
+    border-radius: 14px; box-shadow: 0 24px 60px rgba(30,10,60,0.32);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .modal-head {
+    padding: 18px 22px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(180deg, #FAF7FC 0%, #ffffff 100%);
+  }
+  .modal-title { font-size: 16px; font-weight: 700; color: var(--ink-1); }
+  .modal-sub   { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+  .modal-close {
+    width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line);
+    background: #fff; cursor: pointer; font-size: 16px; color: var(--ink-2);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: var(--p-50); color: var(--p-700); }
+  .modal-body { padding: 16px 22px; overflow-y: auto; flex: 1; }
+  .modal-empty { text-align: center; color: var(--ink-3); padding: 32px 12px; font-size: 13px; }
+  .modal-row {
+    padding: 10px 12px; border: 1px solid transparent;
+    border-radius: 8px; cursor: pointer; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .modal-row:hover { background: var(--p-50); border-color: var(--p-200); }
+  .modal-row-text  { flex: 1; font-size: 13px; color: var(--ink-1); }
+  .modal-row-meta  { font-size: 11px; color: var(--ink-3); }
+  .modal-pill {
+    font-size: 10px; padding: 2px 6px; border-radius: 4px;
+    background: var(--p-50); color: var(--p-700); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .modal-section {
+    font-size: 11px; font-weight: 700; color: var(--ink-3);
+    text-transform: uppercase; letter-spacing: 0.6px; margin: 14px 0 6px;
+  }
+  .modal-section:first-child { margin-top: 0; }
+  .glossary-term { padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .glossary-term:last-child { border-bottom: none; }
+  .glossary-term-name { font-weight: 600; font-size: 13px; color: var(--p-700); }
+  .glossary-term-def  { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; }
+
+  /* sidebar sample query chips */
+  .query-cat { margin: 0 8px 10px; }
+  .query-cat-hd { font-size: 10.5px; text-transform: uppercase; letter-spacing: .6px;
+    color: rgba(255,255,255,0.5); font-weight: 600; padding: 6px 4px; }
+  .query-chip { display: block; width: calc(100% - 0px); text-align: left; border: 0;
+    background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.85); font: inherit;
+    font-size: 12px; padding: 8px 10px; border-radius: 7px; margin-bottom: 4px; cursor: pointer;
+    transition: background .15s; }
+  .query-chip:hover { background: rgba(197,134,215,0.2); color: #fff; }
+
+  /* Voice mic overlay */
+  .mic-overlay {
+    position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center;
+    background: rgba(36,16,56,0.55); backdrop-filter: blur(4px);
+  }
+  .mic-overlay.open { display: flex; }
+  .mic-card { background: #fff; border-radius: 18px; padding: 36px 44px; text-align: center;
+    box-shadow: 0 24px 60px rgba(30,10,60,0.4); }
+  .mic-orb { width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 18px; cursor: pointer;
+    background: linear-gradient(135deg, var(--p-500), var(--p-700)); display: flex; align-items: center; justify-content: center;
+    color: #fff; box-shadow: 0 0 0 0 rgba(124,63,191,0.5); animation: pulse 1.6s infinite; }
+  .mic-overlay.processing .mic-orb { animation: none; opacity: .7; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(124,63,191,0.45);} 70% { box-shadow: 0 0 0 22px rgba(124,63,191,0);} 100% { box-shadow: 0 0 0 0 rgba(124,63,191,0);} }
+  .mic-label { font-size: 15px; font-weight: 600; color: var(--ink); }
+  .mic-overlay-sub { font-size: 12px; color: var(--ink-3); font-weight: 400; margin-top: 6px; }
+
+  footer { display: none; }
+
+  /* =====================================================================
+     RESPONSIVE  —  tablet & phone breakpoints
+     ===================================================================== */
+
+  /* Wide tablets / small laptops: tighten the chat gutters */
+  @media (max-width: 1024px) {
+    .chat-inner    { padding: 28px 18px 200px; }
+    .composer-wrap { padding: 14px 18px 18px; }
+  }
+
+  /* ---- TABLET & PHONE: sidebar becomes an off-canvas drawer (<= 880px) ---- */
+  @media (max-width: 880px) {
+    .app { grid-template-columns: 1fr; }
+
+    /* Slide-in drawer */
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 120;
+      width: 78vw; max-width: 300px;
+      transform: translateX(-100%);
+      transition: transform .25s ease;
+      box-shadow: 0 0 40px rgba(20,10,40,0.35);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .app.nav-open .sidebar { transform: translateX(0); }
+
+    .sidebar-backdrop {
+      display: block; position: fixed; inset: 0; z-index: 110;
+      background: rgba(20,12,40,0.5); backdrop-filter: blur(2px);
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .app.nav-open .sidebar-backdrop { opacity: 1; pointer-events: auto; }
+
+    /* Hamburger shows in the topbar */
+    .menu-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px; flex-shrink: 0;
+      border: 1px solid var(--line); border-radius: 9px;
+      background: var(--surface); color: var(--ink-1); cursor: pointer;
+    }
+
+    /* Topbar: hamburger + horizontally-scrollable scheme switch + actions */
+    .topbar {
+      padding: 10px 14px; gap: 10px;
+      padding-top: max(10px, env(safe-area-inset-top));
+    }
+    .scheme-switch {
+      flex: 1 1 auto; min-width: 0; overflow-x: auto;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .scheme-switch::-webkit-scrollbar { display: none; }
+    .scheme-chip { white-space: nowrap; flex-shrink: 0; padding: 6px 11px; font-size: 12.5px; }
+    .topbar .date-pill { display: none; }      /* save room on small screens */
+    .topbar .actions { gap: 6px; flex-shrink: 0; }
+
+    /* Chat + composer gutters */
+    .chat-inner    { padding: 20px 14px 190px; }
+    .hero { padding: 22px 0 18px; }
+    .hero h1 { font-size: 23px; }
+    .hero p  { font-size: 13.5px; }
+    .scheme-cards { margin: 20px 0; }
+
+    .composer-wrap {
+      left: 0; padding: 12px 14px;
+      padding-bottom: max(14px, env(safe-area-inset-bottom));
+    }
+    .composer-hint { display: none; }          /* keyboard-shortcut hint is desktop-only */
+
+    /* Wide data tables scroll horizontally instead of overflowing */
+    .dyn-grid { grid-template-columns: 1fr; }
+    .rtwrap { -webkit-overflow-scrolling: touch; }
+    .rtwrap .rtbl { min-width: 460px; }
+    .rtwrap .rtbl.record-card { min-width: 0; }   /* key/value cards already fit */
+
+    .scroll-top { bottom: 96px; right: 16px; }
+  }
+
+  /* ---- SMALL PHONES (<= 480px): final tightening ---- */
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 20px; }
+    .hero-eyebrow { font-size: 10px; }
+    .chat-inner { padding: 16px 11px 185px; }
+    .msg .avatar, .msg > div:first-child { width: 28px; height: 28px; }
+    .lang-tabs .lang-tab { padding: 4px 7px; font-size: 10.5px; }
+    .scheme-chip { padding: 6px 9px; font-size: 12px; }
+    .send-btn { padding: 8px 13px; }
+    .composer-input { font-size: 16px; }   /* 16px stops iOS Safari auto-zoom on focus */
+    .modal-card { width: 96vw; max-height: 86vh; }
+  }
+
+  /* Coarse-pointer (touch) niceties — larger tap targets */
+  @media (pointer: coarse) {
+    .nav-item { padding: 11px 12px; }
+    .icon-btn { width: 38px; height: 38px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== GENERIC MODAL ============== -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modalTitle">Recent queries</div>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" title="Close (Esc)">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ============== VOICE MIC OVERLAY ============== -->
+<div class="mic-overlay" id="chatMicOverlay">
+  <div class="mic-card">
+    <div class="mic-orb" onclick="toggleMic()">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    </div>
+    <div class="mic-label" id="chatMicLabel">Listening…<div class="mic-overlay-sub">Tap the mic or press Esc to stop</div></div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <!-- ============== SIDEBAR ============== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">M</div>
+      <div>
+        <div class="brand-name">Megh One AI</div>
+        <div class="brand-sub">NLP Dashboard</div>
+      </div>
+    </div>
+
+    <div class="nav-section">Conversations</div>
+    <div class="nav-item" onclick="newChat()">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+      New chat
+    </div>
+    <div class="nav-item" onclick="openRecent()">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      Recent
+    </div>
+
+    <div class="nav-section">Resources</div>
+    <div class="nav-item" onclick="openGlossary()">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"></path></svg>
+      Glossary
+    </div>
+    <div class="nav-item" onclick="openUseCases()">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      Use cases
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="user-chip" id="userChip">
+        <div class="avatar" id="userAvatar">VK</div>
+        <div style="flex:1; min-width: 0;">
+          <div id="userName" style="color: white; font-size: 12.5px; font-weight: 600;">Vijay Kumar</div>
+          <div id="userRole">State Administrator</div>
+        </div>
+        <svg id="logoutBtn" onclick="handleLogout(event)" title="Sign out" style="cursor:pointer; opacity:0.6;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      </div>
+    </div>
+  </aside>
+  <!-- Mobile drawer backdrop -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeNav()"></div>
+
+  <!-- ============== MAIN ============== -->
+  <main class="main">
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" onclick="toggleNav()" aria-label="Open menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+      <div class="scheme-switch"></div>
+      <div class="date-pill" id="datePill"></div>
+      <div class="actions">
+        <div class="lang-tabs">
+          <button class="lang-tab active" data-lang="en">EN</button>
+          <button class="lang-tab" data-lang="kha">KHA</button>
+          <button class="lang-tab" data-lang="gar">GAR</button>
+        </div>
+        <button class="icon-btn" onclick="openRecent()" title="History">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-area" id="chatArea">
+      <div class="chat-inner" id="chatInner">
+        <!-- HERO / welcome -->
+        <div class="welcome-card" id="welcomeCard">
+          <div class="hero" id="hero">
+            <div class="hero-eyebrow" id="heroEyebrow" style="display:none"></div>
+            <h1>What would you like to know?</h1>
+            <p>Ask anything about your Meghalaya scheme data in natural language and get answers with text, tables, and charts.</p>
+          </div>
+
+          <!-- SCHEME OVERVIEW (informational only — questions auto-route across all three) -->
+          <div class="scheme-cards" id="schemeCards">
+            <div class="scheme-card focus-card">
+              <div class="scheme-card-head">
+                <div class="ico">📊</div>
+                <div>
+                  <h3>Focus</h3>
+                  <div class="meta">FOCUS Producer Group formation &amp; finance register</div>
+                </div>
+              </div>
+              <div class="stats">
+                <div><div class="stat-val" id="focusStatPG">37,351</div><div class="stat-lbl">Producer Groups</div></div>
+                <div><div class="stat-val" id="focusStatMembers">1,97,442</div><div class="stat-lbl">Beneficiaries</div></div>
+                <div><div class="stat-val" id="focusStatDisb">₹47.7 Cr</div><div class="stat-lbl">Disbursed</div></div>
+              </div>
+            </div>
+
+            <div class="scheme-card unified-card">
+              <div class="scheme-card-head">
+                <div class="ico">✅</div>
+                <div>
+                  <h3>FOCUS+</h3>
+                  <div class="meta">Focus farmer payment &amp; registration records</div>
+                </div>
+              </div>
+              <div class="stats">
+                <div><div class="stat-val" id="fpStatBen">1,05,813</div><div class="stat-lbl">Beneficiaries</div></div>
+                <div><div class="stat-val" id="fpStatDist">12</div><div class="stat-lbl">Districts</div></div>
+                <div><div class="stat-val" id="fpStatPaid">₹23.3 Cr</div><div class="stat-lbl">Paid out</div></div>
+              </div>
+            </div>
+
+            <div class="scheme-card elevate-card">
+              <div class="scheme-card-head">
+                <div class="ico">📈</div>
+                <div>
+                  <h3>CM Elevate</h3>
+                  <div class="meta">Loan + subsidy · 13 livelihood verticals</div>
+                </div>
+              </div>
+              <div class="stats">
+                <div><div class="stat-val">2,847</div><div class="stat-lbl">Applications</div></div>
+                <div><div class="stat-val">13</div><div class="stat-lbl">Verticals</div></div>
+                <div><div class="stat-val" id="cmStatDisb">₹84.1 Cr</div><div class="stat-lbl">Disbursed</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="prompts-section">
+            <div class="prompts-title" id="promptsTitle">Try a question</div>
+            <div class="prompt-grid" id="promptGrid"></div>
+          </div>
+        </div>
+
+        <!-- MESSAGES area -->
+        <div id="chatMessages"></div>
+      </div>
+    </div>
+
+    <button class="scroll-top" id="scrollTopBtn" onclick="scrollChatTop()" title="Scroll to top">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+    </button>
+
+    <!-- COMPOSER -->
+    <div class="composer-wrap">
+      <div class="composer-inner">
+        <div class="composer">
+          <textarea class="composer-input" id="queryInput" rows="1" placeholder="Ask anything about Focus…"></textarea>
+          <div class="composer-bar">
+            <button class="send-btn" id="sendBtn" onclick="sendQuery()">
+              Send
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+            </button>
+          </div>
+        </div>
+        <div class="composer-hint">
+          Press <span class="kbd">↵</span> to send · <span class="kbd">⇧</span>+<span class="kbd">↵</span> for new line
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer><div>&copy; 2026 Government of Meghalaya — Megh One AI NLP Dashboard</div></footer>
+
+<script>
+/* =====================================================================
+   MOBILE NAV DRAWER
+   ===================================================================== */
+function toggleNav() { document.getElementById('app').classList.toggle('nav-open'); }
+function closeNav()  { document.getElementById('app').classList.remove('nav-open'); }
+document.addEventListener('DOMContentLoaded', function () {
+  // Any tap inside the sidebar (product switch, new chat, glossary…) closes the drawer.
+  var sb = document.querySelector('.sidebar');
+  if (sb) sb.addEventListener('click', function (e) {
+    if (e.target.closest('.nav-item, .user-chip')) closeNav();
+  });
+  // Esc closes it too.
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeNav(); });
+});
+
+/* =====================================================================
+   PRODUCT CONFIG  (unchanged backend contract: /api/query on each origin)
+   ===================================================================== */
+const PRODUCTS = {
+  // UNIFIED auto-router — the ONLY active product. One box, no scheme buttons. Every question goes to the
+  // Unified-Data backend (port 8000), which decides the scheme(s) from the question and queries the right
+  // table(s) in the shared Neon DB (Focus / FOCUS+ / CM Elevate, or a per-scheme split when generic).
+  unified_auto: {
+    label: 'Megh One AI',
+    base: (new URLSearchParams(location.search).get('api'))
+          || ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+                ? `${location.protocol}//${location.hostname}:8000`
+                : '/focus-plus'),
+    greeting: "Khublei! Ask me anything about your Meghalaya scheme data — Focus, FOCUS+ or CM Elevate.<br><br>Just type your question in plain language. I'll automatically work out which scheme it's about (or compare across all three) and answer with text, tables, and charts. No need to choose a scheme.",
+    samples: [
+      { ico:'👥', text:'How many beneficiaries are there in each scheme?' },
+      { ico:'📍', text:'How many beneficiaries in West Garo Hills?' },
+      { ico:'💰', text:'Total amount paid out under FOCUS+' },
+      { ico:'📝', text:'How many CM Elevate applications were sanctioned?' },
+      { ico:'🔗', text:'How many beneficiaries are in both Focus and FOCUS+?' },
+      { ico:'📊', text:'Top 5 districts by total cross-scheme footprint' }
+    ]
+  },
+  focus: {
+    label: 'Focus',
+    base: (new URLSearchParams(location.search).get('focus'))
+          || ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+                ? `${location.protocol}//${location.hostname}:8200`
+                : '/focus'),
+    greeting: "Khublei! I'm your Focus assistant for the Meghalaya FOCUS Producer Group (PG) records.<br><br>Ask me about PG counts by district or block, tranche-1 / tranche-2 disbursement, bookkeeper coverage, IVCS linkage, or member details.",
+    samples: [
+      { ico:'📊', text:'Top 5 districts by Focus beneficiaries' },
+      { ico:'👥', text:'How many beneficiaries are there in Focus?' },
+      { ico:'🏦', text:'Which bank serves the most Focus beneficiaries?' },
+      { ico:'📍', text:'How many beneficiaries in West Garo Hills?' },
+      { ico:'🟦', text:'Top 10 blocks by Focus beneficiaries' },
+      { ico:'⏳', text:'Unpaid backlog members?' },
+      { ico:'🧪', text:'Data quality scorecard' }
+    ]
+  },
+  focus_plus: {
+    label: 'FOCUS+',
+    base: (new URLSearchParams(location.search).get('focusplus'))
+          || ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+                ? `${location.protocol}//${location.hostname}:8000`
+                : '/focus-plus'),
+    greeting: "Khublei! I'm your FOCUS+ assistant for the Meghalaya Focus Plus farmer payment &amp; registration records.<br><br>Ask me about beneficiary counts by district, paid vs. unpaid farmers, total amount paid, banks, or member lookups.",
+    samples: [
+      { ico:'👥', text:'How many FOCUS+ beneficiaries are there?' },
+      { ico:'📊', text:'Top 5 districts by FOCUS+ beneficiaries' },
+      { ico:'🏦', text:'Which bank serves the most FOCUS+ beneficiaries?' },
+      { ico:'📍', text:'How many beneficiaries in West Garo Hills?' },
+      { ico:'💰', text:'What is the total amount paid out?' },
+      { ico:'⏳', text:'How many farmers are still unpaid?' }
+    ]
+  },
+  cm_elevate: {
+    label: 'CM Elevate',
+    base: (new URLSearchParams(location.search).get('cm'))
+          || ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+                ? `${location.protocol}//${location.hostname}:8100`
+                : '/cm-elevate'),
+    greeting: "Khublei! I'm your CM Elevate assistant for the Meghalaya government scheme disbursement records.<br><br>Ask me about disbursed vs. pending applications, subsidy & loan totals, schemes, districts, or Bank vs. LIFCOM.",
+    samples: [
+      { ico:'📝', text:'How many CM Elevate applications are there?' },
+      { ico:'💰', text:'Total sanctioned amount under CM Elevate' },
+      { ico:'📊', text:'Top 5 CM Elevate schemes by applications' },
+      { ico:'🏦', text:'Bank vs LIFCOM split in CM Elevate' },
+      { ico:'📍', text:'CM Elevate disbursement by district' },
+      { ico:'📈', text:'CM Elevate disbursement trend by year' }
+    ]
+  },
+  // Cross Scheme mode — routes to the Unified-Data backend (port 8000 / Focus+ home), which carries the
+  // full cross-scheme rules + few-shots (cross_scheme.py) and can JOIN across all three scheme tables in
+  // one query. Use this mode for any question that compares, combines, or relates Focus / Focus+ / CM Elevate.
+  cross_scheme: {
+    label: 'Cross Scheme',
+    base: (new URLSearchParams(location.search).get('cross'))
+          || ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+                ? `${location.protocol}//${location.hostname}:8000`
+                : '/focus-plus'),
+    greeting: "Khublei! I'm your Cross-Scheme assistant — I can answer questions that span Focus, FOCUS+ and CM Elevate together.<br><br>Ask me about beneficiaries across schemes, district-wise footprint across all 3, overlap by EPIC, scheme dominance, or combined disbursement. (Note: CM Elevate has no EPIC, so person-level overlaps cover Focus &amp; FOCUS+; CM Elevate is compared by district.)",
+    samples: [
+      { ico:'🧭', text:'How many beneficiaries are in each scheme?' },
+      { ico:'📊', text:'Top 5 districts by total cross-scheme footprint' },
+      { ico:'🔗', text:'How many beneficiaries are in both Focus and FOCUS+?' },
+      { ico:'💰', text:'Households receiving the most across all 3 schemes' },
+      { ico:'🏛️', text:'Which districts are active in all 3 schemes?' },
+      { ico:'⚖️', text:'Districts with single-scheme dependency' }
+    ]
+  }
+};
+// Single unified auto-router: there are no scheme buttons, so the product is always 'unified_auto'.
+// (Any stale per-scheme value from an older session is ignored.)
+let currentProduct = 'unified_auto';
+function productBase() { return PRODUCTS[currentProduct].base; }
+
+let SESSION_ID = sessionStorage.getItem('focusSessionId') || generateSessionId();
+function generateSessionId() {
+  const id = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  sessionStorage.setItem('focusSessionId', id);
+  return id;
+}
+function getSessionId() { return SESSION_ID; }
+// Start a brand-new conversation: rotate the session id so the backend loads NO prior
+// context. Without this a "New chat" kept the old session_id and the previous district
+// (e.g. "West Garo Hills") bled into the next, unrelated question.
+function resetSession() {
+  sessionStorage.removeItem('focusSessionId');
+  SESSION_ID = generateSessionId();
+  return SESSION_ID;
+}
+
+/* ============ DATE PILL ============ */
+(function setDate() {
+  const d = new Date();
+  const opts = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+  const el = document.getElementById('datePill');
+  if (el) el.textContent = d.toLocaleDateString('en-GB', opts);
+})();
+
+/* ============ LANGUAGE TABS ============ */
+let currentLang = 'en';
+document.querySelectorAll('.lang-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentLang = btn.getAttribute('data-lang');
+  });
+});
+
+/* ============ INPUT HELPERS ============ */
+const inp = document.getElementById('queryInput');
+inp.addEventListener('input', () => {
+  inp.style.height = 'auto';
+  inp.style.height = Math.min(inp.scrollHeight, 160) + 'px';
+});
+inp.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuery(); }
+});
+function useQuery(text) {
+  inp.value = text;
+  inp.style.height = 'auto';
+  inp.style.height = Math.min(inp.scrollHeight, 160) + 'px';
+  inp.focus();
+}
+function ask(text) { useQuery(text); sendQuery(); }
+
+/* ============ HERO PROMPT CARDS ============ */
+function renderPrompts() {
+  const grid = document.getElementById('promptGrid');
+  if (!grid) return;
+  const samples = PRODUCTS[currentProduct].samples || [];
+  grid.innerHTML = samples.map(s =>
+    `<div class="prompt" onclick="ask('${s.text.replace(/'/g,"\\'")}')">
+       <span class="ic">${s.ico}</span><span class="prompt-text">${escapeHTML(s.text)}</span>
+     </div>`
+  ).join('');
+}
+
+/* ============ CHAT RENDERING ============ */
+const messages = document.getElementById('chatMessages');
+let welcome  = document.getElementById('welcomeCard');
+let welcomeRemoved = false;
+
+const scrollArea = document.getElementById('chatArea');
+const scrollTopBtn = document.getElementById('scrollTopBtn');
+if (scrollArea && scrollTopBtn) {
+  scrollArea.addEventListener('scroll', () => {
+    if (scrollArea.scrollTop > 200) scrollTopBtn.classList.add('show');
+    else scrollTopBtn.classList.remove('show');
+  });
+}
+function scrollChatTop() { if (scrollArea) scrollArea.scrollTo({ top: 0, behavior: 'smooth' }); }
+function scrollToBottom() { if (scrollArea) scrollArea.scrollTop = scrollArea.scrollHeight + 9999; }
+
+function nowTime() { return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }); }
+function escapeHTML(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function hideWelcome() {
+  if (!welcomeRemoved && welcome) { welcome.style.display = 'none'; welcomeRemoved = true; }
+}
+
+function addMessage(role, text, isHTML = false) {
+  hideWelcome();
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  const avatarText = role === 'user' ? 'U' : 'M';
+  const content = isHTML ? text : escapeHTML(text).replace(/\n/g, '<br>');
+  div.innerHTML = `
+    <div class="av">${avatarText}</div>
+    <div>
+      <div class="bubble">${content}</div>
+      <div class="mtime">${nowTime()}</div>
+    </div>`;
+  messages.appendChild(div);
+  scrollToBottom();
+}
+
+function addTyping() {
+  hideWelcome();
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.id = 'typing-indicator';
+  div.innerHTML = `
+    <div class="av">M</div>
+    <div>
+      <div class="bubble typing-bubble">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>`;
+  messages.appendChild(div);
+  scrollToBottom();
+}
+function removeTyping() { const t = document.getElementById('typing-indicator'); if (t) t.remove(); }
+
+/* ============ API CALLS  (unchanged contract) ============ */
+async function fetchNLPResponse(question) {
+  const body = { question, language: 'en', session_id: getSessionId(), include_sql: true };
+  // The Unified-Data backend auto-routes every question to the right scheme table(s) from the
+  // question text itself — no scheme/mode flag needed.
+  const response = await fetch(`${productBase()}/api/query`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!response.ok) {
+    let detail = 'API request failed';
+    try { detail = (await response.json()).detail || detail; } catch (e) {}
+    throw new Error(detail);
+  }
+  return await response.json();
+}
+
+/* ============ ANALYTICS RENDERER (Chart.js — purple palette) ============ */
+const PAL2 = ['#5C2D91','#7C3FBF','#9558CF','#B27FE0','#CFA8EE','#E5D2F6','#8bbff3','#b8d8f8'];
+const CHART_TOOLTIP = {
+  backgroundColor:'rgba(36,16,56,.96)', titleColor:'#F4EBFC', bodyColor:'rgba(244,235,252,.9)',
+  padding:12, cornerRadius:6, borderColor:'rgba(255,255,255,.12)', borderWidth:1,
+  titleFont:{family:'Inter',size:12,weight:'700'}, bodyFont:{family:'Inter',size:12},
+  callbacks:{ label: ctx => '  ' + Number(ctx.raw).toLocaleString('en-IN') }
+};
+const LOPT = {
+  responsive:true, maintainAspectRatio:false,
+  animation:{ duration:600, easing:'easeOutQuart' },
+  plugins:{
+    legend:{ labels:{ font:{family:'Inter',size:12,weight:'500'}, padding:16, usePointStyle:true, pointStyle:'circle', color:'#1A1626' } },
+    tooltip: CHART_TOOLTIP
+  }
+};
+const AOPT = {
+  responsive:true, maintainAspectRatio:false,
+  animation:{ duration:600, easing:'easeOutQuart' },
+  plugins:{ legend:{ display:false }, tooltip: CHART_TOOLTIP },
+  scales:{
+    x:{ grid:{ color:'rgba(92,45,145,.06)', drawBorder:false }, ticks:{ font:{family:'Inter',size:11,weight:'500'}, color:'#857E96', padding:8 }, border:{ display:false } },
+    y:{ grid:{ color:'rgba(92,45,145,.06)', drawBorder:false }, ticks:{ font:{family:'Inter',size:11,weight:'500'}, color:'#857E96', padding:8 }, border:{ display:false } }
+  }
+};
+
+const CI = {};
+window._QD = window._QD || {};
+let _chartIdx = 0;
+function killChart(id) { if (CI[id]) { try { CI[id].destroy(); } catch(e){} delete CI[id]; } }
+
+function rQC(cid, type) {
+  const qd = window._QD[cid]; if (!qd) return;
+  const { labels, values } = qd; killChart(cid);
+  const cv = document.getElementById(cid); if (!cv) return;
+  if (type === 'bar') {
+    CI[cid] = new Chart(cv, { type:'bar', data:{ labels, datasets:[{ data:values,
+      backgroundColor: ctx=>{ const g=ctx.chart.ctx.createLinearGradient(0,0,0,220); g.addColorStop(0,'#5C2D91'); g.addColorStop(1,'#9558CF'); return g; },
+      borderRadius:5, borderWidth:0 }] }, options:{ ...AOPT } });
+  } else if (type === 'doughnut') {
+    CI[cid] = new Chart(cv, { type:'doughnut', data:{ labels, datasets:[{ data:values, backgroundColor:PAL2, borderWidth:2, borderColor:'#fff', cutout:'65%' }] },
+      options:{ ...LOPT, plugins:{ ...LOPT.plugins, legend:{ ...LOPT.plugins.legend, position:'right' } } } });
+  } else {
+    CI[cid] = new Chart(cv, { type:'line', data:{ labels, datasets:[{ data:values, borderColor:'#5C2D91', borderWidth:2.5,
+      backgroundColor:'rgba(92,45,145,.10)', tension:.4, fill:true, pointRadius:4, pointBackgroundColor:'#fff', pointBorderColor:'#5C2D91', pointBorderWidth:2 }] },
+      options:{ ...AOPT, plugins:{ legend:{ display:false }, tooltip: CHART_TOOLTIP } } });
+  }
+}
+function swDyn(cid, type, btn) {
+  btn.closest('.qctog').querySelectorAll('.ctb').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  rQC(cid, type);
+}
+function groupedBar(id, labels, datasets) {
+  killChart(id);
+  const ds = datasets.map((d, i) => ({ label:d.label, data:d.values, backgroundColor:PAL2[i % PAL2.length], borderRadius:4, borderWidth:0 }));
+  CI[id] = new Chart(document.getElementById(id), { type:'bar', data:{ labels, datasets: ds },
+    options:{ ...AOPT, plugins:{ ...AOPT.plugins, legend:{ display:true, labels:{ font:{family:'Inter',size:11,weight:'600'}, color:'#1A1626', padding:14 } } } } });
+}
+function stackedBar(id, labels, datasets) {
+  killChart(id);
+  const ds = datasets.map((d, i) => ({ label:d.label, data:d.data, backgroundColor:PAL2[i % PAL2.length], borderRadius:3, borderWidth:0 }));
+  CI[id] = new Chart(document.getElementById(id), { type:'bar', data:{ labels, datasets: ds },
+    options:{ ...AOPT, plugins:{ ...AOPT.plugins, legend:{ display:true, labels:{ font:{family:'Inter',size:11,weight:'600'}, color:'#1A1626', padding:14 } } },
+      scales:{ x:{ ...AOPT.scales.x, stacked:true }, y:{ ...AOPT.scales.y, stacked:true } } } });
+}
+function pivotStackedBar(data, xKey, sKey, vKey) {
+  const xLabels = [...new Set(data.map(r => r[xKey]))];
+  const sLabels = [...new Set(data.map(r => r[sKey]))];
+  const datasets = sLabels.map(sl => ({ label: sl, data: xLabels.map(xl => {
+    const row = data.find(r => r[xKey] === xl && r[sKey] === sl); return row ? Number(row[vKey]) : 0;
+  })}));
+  return { labels: xLabels, datasets };
+}
+
+function buildDynTable(data, fullWidth) {
+  if (!data || !data.length) return '';
+  const cols = Object.keys(data[0]);
+  const shown = data.slice(0, 100);
+  let html = `<div class="rtwrap"><table class="rtbl"><thead><tr>` +
+    cols.map(c => `<th>${escapeHTML(c.replace(/_/g,' '))}</th>`).join('') + `</tr></thead><tbody>` +
+    shown.map(r => `<tr>` + cols.map(c => `<td>${escapeHTML(String(r[c] ?? '—'))}</td>`).join('') + `</tr>`).join('') +
+    `</tbody></table></div>`;
+  if (data.length > shown.length) html += `<div class="rtbl-note">Showing ${shown.length} of ${data.length} rows.</div>`;
+  return html;
+}
+function buildPivotTable(data, xKey, sKey, vKey) {
+  if (!data || !data.length) return '';
+  const xVals = [...new Set(data.map(r => r[xKey]))];
+  const sVals = [...new Set(data.map(r => r[sKey]))];
+  const lookup = {}; data.forEach(r => { lookup[`${r[xKey]}||${r[sKey]}`] = r[vKey]; });
+  const rowTotals = {}; xVals.forEach(x => { rowTotals[x] = sVals.reduce((s,sv) => s + (parseFloat(lookup[`${x}||${sv}`]) || 0), 0); });
+  const colTotals = {}; sVals.forEach(sv => { colTotals[sv] = xVals.reduce((s,x) => s + (parseFloat(lookup[`${x}||${sv}`]) || 0), 0); });
+  const grand = xVals.reduce((s,x) => s + rowTotals[x], 0);
+  return `<div class="rtwrap" style="overflow-x:auto"><table class="rtbl"><thead><tr>` +
+    `<th>${escapeHTML(xKey.replace(/_/g,' '))}</th>` + sVals.map(sv => `<th>${escapeHTML(sv)}</th>`).join('') + `<th>Total</th></tr></thead><tbody>` +
+    xVals.map(x => `<tr><td><strong>${escapeHTML(String(x))}</strong></td>` +
+      sVals.map(sv => `<td>${escapeHTML(String(lookup[`${x}||${sv}`] ?? '—'))}</td>`).join('') +
+      `<td><strong>${rowTotals[x].toLocaleString('en-IN')}</strong></td></tr>`).join('') +
+    `<tr style="background:var(--p-50);font-weight:600"><td><strong>Total</strong></td>` +
+      sVals.map(sv => `<td>${colTotals[sv].toLocaleString('en-IN')}</td>`).join('') +
+      `<td><strong>${grand.toLocaleString('en-IN')}</strong></td></tr>` +
+    `</tbody></table></div>`;
+}
+function buildRecordCard(row) {
+  const entries = Object.entries(row).filter(([, v]) => v !== null && v !== '' && String(v) !== 'None');
+  if (!entries.length) return buildDynTable([row], true);
+  return `<div class="rtwrap" style="max-height:none"><table class="rtbl record-card"><tbody>` +
+    entries.map(([k, v]) => `<tr><th style="width:42%">${escapeHTML(k.replace(/_/g,' '))}</th><td>${escapeHTML(String(v))}</td></tr>`).join('') +
+    `</tbody></table></div>`;
+}
+
+function buildAnalytics(question, data, hintType) {
+  if (!Array.isArray(data) || data.length === 0) return { html: '', init: () => {} };
+
+  if (data.length === 1 && hintType === 'kpi_bar') {
+    _chartIdx++;
+    const cid = `dync_${_chartIdx}_kpi`;
+    const row = data[0];
+    const keys = Object.keys(row);
+    const labels = keys.map(k => k.replace(/_/g,' '));
+    const values = keys.map(k => parseFloat(row[k]) || 0);
+    const html = `<div class="analytics"><div class="dyn-grid single"><div class="dyn-chart-card">
+      <div class="chd"><div class="chd-left"><span class="chd-dot"></span><span class="chd-title">Summary</span></div>
+        <div class="qctog">
+          <button class="ctb on" onclick="swDyn('${cid}','bar',this)">Bar</button>
+          <button class="ctb" onclick="swDyn('${cid}','doughnut',this)">Donut</button>
+        </div>
+      </div>
+      <div class="chw"><canvas id="${cid}"></canvas></div>
+    </div></div>${buildRecordCard(row)}</div>`;
+    const init = () => { window._QD[cid] = { labels, values }; rQC(cid, 'bar'); };
+    return { html, init };
+  }
+
+  if (data.length === 1) {
+    return { html: `<div class="analytics">${buildRecordCard(data[0])}</div>`, init: () => {} };
+  }
+
+  const cols = Object.keys(data[0]);
+  const numCols = cols.filter(c => data.every(r => r[c] !== null && r[c] !== '' && !isNaN(parseFloat(r[c]))));
+  const lblCols = cols.filter(c => !numCols.includes(c));
+
+  if (!numCols.length) return { html: `<div class="analytics">${buildDynTable(data, true)}</div>`, init: () => {} };
+
+  _chartIdx++;
+  const lc = lblCols[0] || cols[0];
+  const isTime = /month|period|year|date|trend/i.test(lc) || /year|month|trend/i.test(question);
+  const isFew = data.length <= 6;
+  const defType = (hintType === 'bar' || hintType === 'doughnut' || hintType === 'line')
+    ? hintType : (isTime ? 'line' : isFew ? 'doughnut' : 'bar');
+
+  if (hintType === 'grouped_bar') {
+    const cid = `dync_${_chartIdx}_g`;
+    const labels = data.map(r => String(r[lc]).length > 18 ? String(r[lc]).slice(0,16)+'…' : String(r[lc]));
+    const datasets = numCols.map(nc => ({ label: nc.replace(/_/g,' '), values: data.map(r => parseFloat(r[nc]) || 0) }));
+    const html = `<div class="analytics"><div class="dyn-grid single"><div class="dyn-chart-card">
+      <div class="chd"><div class="chd-left"><span class="chd-dot"></span><span class="chd-title">Grouped comparison by ${escapeHTML(lc.replace(/_/g,' '))}</span></div><span class="chd-pill">Grouped Bar</span></div>
+      <div class="chw" style="height:280px"><canvas id="${cid}"></canvas></div>
+    </div></div>${buildDynTable(data, true)}</div>`;
+    return { html, init: () => groupedBar(cid, labels, datasets) };
+  }
+
+  if (hintType === 'stacked' && lblCols.length >= 2 && numCols.length >= 1) {
+    const xKey = lblCols[0], sKey = lblCols[1], vKey = numCols[0];
+    const cid = `dync_${_chartIdx}_s`;
+    const { labels, datasets } = pivotStackedBar(data, xKey, sKey, vKey);
+    const html = `<div class="analytics"><div class="dyn-grid single"><div class="dyn-chart-card">
+      <div class="chd"><div class="chd-left"><span class="chd-dot"></span><span class="chd-title">${escapeHTML(vKey.replace(/_/g,' '))} by ${escapeHTML(xKey.replace(/_/g,' '))} &amp; ${escapeHTML(sKey.replace(/_/g,' '))}</span></div><span class="chd-pill">Stacked Bar</span></div>
+      <div class="chw" style="height:320px"><canvas id="${cid}"></canvas></div>
+    </div></div>${buildPivotTable(data, xKey, sKey, vKey)}</div>`;
+    return { html, init: () => stackedBar(cid, labels, datasets) };
+  }
+
+  const chartsToRender = numCols.slice(0, 3);
+  const single = chartsToRender.length === 1;
+  let html = `<div class="analytics"><div class="dyn-grid${single ? ' single' : ''}">`;
+  chartsToRender.forEach((vc, i) => {
+    const cid = `dync_${_chartIdx}_${i}`;
+    html += `<div class="dyn-chart-card">
+      <div class="chd"><div class="chd-left"><span class="chd-dot"></span><span class="chd-title">${escapeHTML(vc.replace(/_/g,' '))} by ${escapeHTML(lc.replace(/_/g,' '))}</span></div>
+        <div class="qctog">
+          <button class="ctb${defType==='bar'?' on':''}" onclick="swDyn('${cid}','bar',this)">Bar</button>
+          <button class="ctb${defType==='doughnut'?' on':''}" onclick="swDyn('${cid}','doughnut',this)">Donut</button>
+          <button class="ctb${defType==='line'?' on':''}" onclick="swDyn('${cid}','line',this)">Line</button>
+        </div>
+      </div>
+      <div class="chw"><canvas id="${cid}"></canvas></div>
+    </div>`;
+  });
+  html += `</div>${buildDynTable(data, true)}</div>`;
+
+  const init = () => {
+    chartsToRender.forEach((vc, i) => {
+      const cid = `dync_${_chartIdx}_${i}`;
+      const labels = data.map(r => String(r[lc]).length > 18 ? String(r[lc]).slice(0,16)+'…' : String(r[lc]));
+      const values = data.map(r => parseFloat(r[vc]) || 0);
+      window._QD[cid] = { labels, values };
+      rQC(cid, defType);
+    });
+  };
+  return { html, init };
+}
+
+/* ============ FOLLOW-UP "NEXT STEP" + SOURCES ============ */
+// Pretty-print a raw table name: "focus_plus_payments" -> "FOCUS+ payments"
+function prettyName(s) {
+  // Map raw Neon table names to friendly scheme names. Meghalaya_Chatbot IS the FOCUS+ table, so show "FOCUS+"
+  // (never the raw "Meghalaya Chatbot"); focus_pg → Focus; cm_elevate → CM Elevate.
+  return String(s || '')
+    .replace(/meghalaya_chatbot/gi, 'FOCUS+')
+    .replace(/focus_pg/gi, 'Focus')
+    .replace(/focus_plus/gi, 'FOCUS+')
+    .replace(/cm_elevate/gi, 'CM Elevate')
+    .replace(/_/g, ' ')
+    .trim();
+}
+function buildFollowUp(question, response) {
+  if (!response || response.intent === 'EDGE') return '';
+
+  // The follow-up is generated by the model from THIS question + result rows,
+  // so it is always specific to what was actually asked.
+  const suggestion = (response.follow_up || '').trim();
+  if (!suggestion) return '';
+
+  // Sources line: scheme name(s) from SQL + grouping clause hint. A cross-scheme / per-scheme-split query hits
+  // more than one table, so collect EVERY distinct table (after FROM or JOIN) and show their friendly names.
+  const sql = response.sql_query || '';
+  let tableChip = '';
+  const tableMatches = [...sql.matchAll(/(?:from|join)\s+["']?([a-z0-9_.]+)["']?/gi)];
+  if (tableMatches.length) {
+    const seen = [];
+    for (const m of tableMatches) {
+      const pretty = prettyName(m[1].replace(/["']/g, '').split('.').pop());
+      if (pretty && !seen.includes(pretty)) seen.push(pretty);
+    }
+    // Keep only real scheme tables (drop subquery aliases that slipped through).
+    const schemes = seen.filter(n => ['FOCUS+', 'Focus', 'CM Elevate'].includes(n));
+    tableChip = (schemes.length ? schemes : seen).join(', ');
+  }
+  const groupMatch = sql.match(/group\s+by\s+([a-z0-9_.,\s"]+?)(?:order\s+by|limit|having|$)/i);
+  const groupChip = groupMatch ? 'GROUP BY ' + groupMatch[1].replace(/["']/g, '').trim().split(/\s+/)[0].split('.').pop() : '';
+
+  let sourcesHTML = '';
+  if (tableChip || groupChip) {
+    sourcesHTML = `<div class="ans-sources"><span class="src-lbl">Sources:</span>` +
+      (tableChip ? `<span class="src-chip">${escapeHTML(tableChip)}</span>` : '') +
+      (groupChip ? `<span class="src-chip">${escapeHTML(groupChip)}</span>` : '') +
+      `</div>`;
+  }
+
+  // Clicking the suggestion runs it as the next question.
+  const onClick = ` onclick="ask(&quot;${escapeHTML(suggestion).replace(/"/g,'&quot;')}&quot;)"`;
+  const nextHTML = `<div class="next-step"${onClick}>
+      <div class="next-step-label">Next step</div>
+      <div class="next-step-text">${escapeHTML(suggestion)}</div>
+    </div>`;
+
+  return nextHTML + sourcesHTML;
+}
+
+// Build a "Generate SQL Query" button + collapsible code block for a SQL answer.
+// Returns '' when the response carries no SQL (EDGE/REASON answers, fallbacks).
+let _sqlIdx = 0;
+function buildSqlBlock(response) {
+  const sql = response && response.sql_query;
+  if (!sql || !String(sql).trim()) return '';
+  _sqlIdx++;
+  const id = `sql_${_sqlIdx}`;
+  return `<div class="sql-block">
+    <button class="sql-toggle-btn" onclick="toggleSql('${id}', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
+      </svg>
+      <span class="sql-toggle-label">Generate SQL Query</span>
+    </button>
+    <div class="sql-code-wrap" id="${id}">
+      <div class="sql-code-head">
+        <span>SQL Query</span>
+        <button class="sql-copy-btn" onclick="copySql('${id}', this)">Copy</button>
+      </div>
+      <pre class="sql-code">${escapeHTML(String(sql).trim())}</pre>
+    </div>
+  </div>`;
+}
+// Toggle the SQL code block open/closed and update the button label.
+function toggleSql(id, btn) {
+  const wrap = document.getElementById(id);
+  if (!wrap) return;
+  const open = wrap.classList.toggle('open');
+  const label = btn.querySelector('.sql-toggle-label');
+  if (label) label.textContent = open ? 'Hide SQL Query' : 'Generate SQL Query';
+}
+// Copy the SQL text to the clipboard, with brief visual confirmation.
+function copySql(id, btn) {
+  const code = document.querySelector(`#${id} .sql-code`);
+  if (!code) return;
+  const text = code.textContent;
+  const done = () => { const o = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = o; }, 1400); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => done());
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta); done();
+  }
+}
+
+function addBotRich(question, response) {
+  hideWelcome();
+  const answerHTML = escapeHTML(response.answer || '').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+  const wantsAnalytics = response.intent !== 'EDGE' && Array.isArray(response.data) && response.data.length >= 1;
+  const analytics = wantsAnalytics ? buildAnalytics(question, response.data, response.chart_type) : { html: '', init: () => {} };
+  const followUp = buildFollowUp(question, response);
+  const sqlBlock = buildSqlBlock(response);
+  const meta = (response.intent && response.intent !== 'EDGE')
+    ? `<div class="mtime">${nowTime()} &middot; ${response.row_count || 0} result${response.row_count === 1 ? '' : 's'} &middot; ${response.execution_time_ms || 0}ms</div>`
+    : `<div class="mtime">${nowTime()}</div>`;
+  const answerBlock = answerHTML ? `<div class="answer-text">${answerHTML}</div>` : '';
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.innerHTML = `
+    <div class="av">M</div>
+    <div>
+      <div class="bubble">${answerBlock}${analytics.html}${sqlBlock}${followUp}</div>
+      ${meta}
+    </div>`;
+  messages.appendChild(div);
+  requestAnimationFrame(() => { try { analytics.init(); } catch (e) { console.error('Chart init failed:', e); } });
+  scrollToBottom();
+}
+
+/* ============ SAMPLE QUESTIONS (sidebar) ============ */
+async function loadSampleQuestions() {
+  const container = document.getElementById('queriesContainer');
+  if (!container) return;
+  container.innerHTML = '<div class="query-cat"><div class="query-cat-hd">Loading…</div></div>';
+  try {
+    const data = await fetch(`${productBase()}/api/query/suggestions`).then(r => r.json());
+    const categories = data && data.categories ? data.categories : {};
+    const entries = Object.entries(categories);
+    if (entries.length === 0) {
+      container.innerHTML = '<div class="query-cat"><div class="query-cat-hd">No questions available</div></div>';
+      return;
+    }
+    const stripIcon = s => String(s).replace(/^[^\p{L}\p{N}]+/u, '').trim();
+    let html = '';
+    for (const [cat, questions] of entries) {
+      html += `<div class="query-cat"><div class="query-cat-hd">${escapeHTML(stripIcon(cat))}</div>`;
+      (questions || []).forEach(q => {
+        const safe = String(q).replace(/'/g, "\\'");
+        html += `<button class="query-chip" onclick="useQuery('${safe}')">${escapeHTML(q)}</button>`;
+      });
+      html += '</div>';
+    }
+    container.innerHTML = html;
+  } catch (err) {
+    console.error('Failed to load sample questions:', err);
+    container.innerHTML = '<div class="query-cat"><div class="query-cat-hd">Could not load sample queries</div></div>';
+  }
+}
+
+/* ============ RECENT (localStorage) ============ */
+const RECENT_KEY = 'megh_recent_queries';
+const RECENT_MAX = 25;
+function pushRecent(query, product) {
+  try {
+    const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    const filtered = arr.filter(e => e.q !== query);
+    filtered.unshift({ q: query, product, ts: Date.now() });
+    localStorage.setItem(RECENT_KEY, JSON.stringify(filtered.slice(0, RECENT_MAX)));
+  } catch(e) {}
+}
+function openModal(title, sub, body) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalSub').textContent = sub || '';
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modalBackdrop').classList.add('show');
+}
+function closeModal() { document.getElementById('modalBackdrop').classList.remove('show'); }
+function openRecent() {
+  let arr = [];
+  try { arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch(e) {}
+  let body;
+  if (!arr.length) {
+    body = `<div class="modal-empty">No recent queries yet.<br>Ask something — it'll show up here.</div>`;
+  } else {
+    const fmtAgo = ts => {
+      const s = Math.floor((Date.now() - ts) / 1000);
+      if (s < 60) return s + 's ago';
+      if (s < 3600) return Math.floor(s/60) + 'm ago';
+      if (s < 86400) return Math.floor(s/3600) + 'h ago';
+      return Math.floor(s/86400) + 'd ago';
+    };
+    body = arr.map(e => `
+      <div class="modal-row" onclick="closeModal(); switchProduct('${e.product||'focus'}'); ask(${JSON.stringify(e.q)});">
+        <span class="modal-pill">${escapeHTML((PRODUCTS[e.product||'focus']||{}).label || e.product)}</span>
+        <span class="modal-row-text">${escapeHTML(e.q)}</span>
+        <span class="modal-row-meta">${fmtAgo(e.ts)}</span>
+      </div>`).join('');
+  }
+  openModal('Recent queries', `${arr.length} of ${RECENT_MAX} most recent · click to re-run`, body);
+}
+/* ============ GLOSSARY ============ */
+const GLOSSARY = {
+  'FOCUS+': [
+    { term: 'FOCUS+', def: 'Direct Benefit Transfer scheme — ₹5,000/year per farmer.' },
+    { term: 'Beneficiary', def: 'A farmer who has received a FOCUS+ payment. Lives in focus_plus_payments table.' },
+    { term: 'Registered (not paid)', def: 'Farmer in focus_plus_new but NOT in focus_plus_payments — eligible, awaiting disbursement.' },
+    { term: 'EPIC ID', def: 'Voter ID; primary identifier in FOCUS+. First 3 chars = Assembly Constituency code.' },
+    { term: 'AC code', def: 'Assembly Constituency code — first 3 letters of EPIC ID (e.g. FTB, WGH).' }
+  ]
+};
+function openGlossary() {
+  let body = '';
+  for (const [section, terms] of Object.entries(GLOSSARY)) {
+    body += `<div class="modal-section">${escapeHTML(section)}</div>`;
+    body += terms.map(t =>
+      `<div class="glossary-term">
+         <div class="glossary-term-name">${escapeHTML(t.term)}</div>
+         <div class="glossary-term-def">${escapeHTML(t.def)}</div>
+       </div>`).join('');
+  }
+  openModal('Glossary', 'Domain terms across all schemes', body);
+}
+
+/* ============ USE CASES ============ */
+const USE_CASES = {
+  'Focus': [
+    'Top 5 districts by Focus beneficiaries',
+    'How many beneficiaries are there in Focus?',
+    'Which bank serves the most Focus beneficiaries?',
+    'Unpaid backlog members?'
+  ],
+  'CM Elevate': [
+    'How many CM Elevate applications are there?',
+    'Total sanctioned amount under CM Elevate',
+    'Top 5 CM Elevate schemes by applications',
+    'Bank vs LIFCOM split in CM Elevate'
+  ]
+};
+function openUseCases() {
+  let body = '';
+  for (const [section, items] of Object.entries(USE_CASES)) {
+    body += `<div class="modal-section">${escapeHTML(section)}</div>`;
+    body += items.map(q =>
+      `<div class="modal-row" onclick="closeModal(); ask(${JSON.stringify(q)});">
+         <span class="modal-row-text">${escapeHTML(q)}</span>
+       </div>`).join('');
+  }
+  openModal('Use cases', 'Example questions you can ask', body);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ============ GREETING + NEW CHAT ============ */
+function showGreeting(immediate) {
+  // Greeting bubble removed — the chat starts without the "Khublei! I'm your ... assistant" message.
+}
+function newChat() {
+  resetSession();           // fresh session_id → no prior district/context bleed
+  Object.keys(CI).forEach(killChart);
+  window._QD = {};
+  messages.innerHTML = '';
+  if (welcome) { welcome.style.display = ''; welcomeRemoved = false; }
+  showGreeting(true);
+}
+
+/* ============ PRODUCT (scheme) SWITCH ============ */
+function syncProductUI() {
+  // Unified router: one box, no scheme badge to show.
+  const eyebrow = document.getElementById('heroEyebrow');
+  if (eyebrow) { eyebrow.textContent = ''; eyebrow.style.display = 'none'; }
+  const pt = document.getElementById('promptsTitle');
+  if (pt) pt.textContent = 'Try a question';
+  inp.placeholder = 'Ask anything about your Meghalaya scheme data…';
+}
+// Scheme switching is gone — the unified router always uses 'unified_auto'. Kept as a no-op so older
+// Recent-history entries (which may carry a per-scheme product) don't change the active backend.
+function switchProduct() { /* unified auto-router — no per-scheme switching */ }
+
+/* ============ SCHEME CARD SELECTION ============
+   Clicking a card highlights it, points the chat at the right backend, and shows
+   that scheme's questions in the prompt grid right below the cards. */
+const CARD_QUESTIONS = {
+  focus: {
+    product: 'focus',
+    title: 'Try a Focus (Producer Group) question',
+    items: [
+      { ico:'🟦', text:'How many Producer Groups are there in total?' },
+      { ico:'📍', text:'Top 10 blocks by Focus PG count' },
+      { ico:'👥', text:'How many PG members are registered overall?' },
+      { ico:'💰', text:'Total tranche-1 disbursement.' },
+      { ico:'📖', text:'How many PG members have a bookkeeper?' },
+      { ico:'🚻', text:'Gender split of Focus PG members' }
+    ]
+  },
+  focus_plus: {
+    product: 'focus_plus',
+    title: 'Try a FOCUS+ question',
+    items: [
+      { ico:'👥', text:'How many FOCUS+ beneficiaries are there?' },
+      { ico:'📊', text:'Top 5 districts by FOCUS+ beneficiaries' },
+      { ico:'🏦', text:'Which bank serves the most FOCUS+ beneficiaries?' },
+      { ico:'📍', text:'How many beneficiaries in West Garo Hills?' },
+      { ico:'💰', text:'What is the total amount paid out?' }
+    ]
+  },
+  cm_elevate: {
+    product: 'cm_elevate',
+    title: 'Try a CM Elevate question',
+    items: [
+      { ico:'📝', text:'How many CM Elevate applications are there?' },
+      { ico:'💰', text:'Total sanctioned amount under CM Elevate' },
+      { ico:'📊', text:'Top 5 CM Elevate schemes by applications' },
+      { ico:'🏦', text:'Bank vs LIFCOM split in CM Elevate' },
+      { ico:'📍', text:'CM Elevate disbursement by district' },
+      { ico:'📈', text:'CM Elevate disbursement trend by year' }
+    ]
+  },
+  cross_scheme: {
+    product: 'cross_scheme',
+    title: 'Try a cross-scheme question',
+    items: [
+      { ico:'🧭', text:'How many beneficiaries are in each scheme?' },
+      { ico:'📊', text:'Top 5 districts by total cross-scheme footprint' },
+      { ico:'🔗', text:'How many beneficiaries are in both Focus and FOCUS+?' },
+      { ico:'💰', text:'Households receiving the most across all 3 schemes' },
+      { ico:'🏛️', text:'Which districts are active in all 3 schemes?' },
+      { ico:'⚖️', text:'Districts with single-scheme dependency' }
+    ]
+  }
+};
+let selectedCard = null;
+
+function renderCardQuestions(cardKey) {
+  const conf = CARD_QUESTIONS[cardKey];
+  const grid = document.getElementById('promptGrid');
+  const title = document.getElementById('promptsTitle');
+  if (!conf || !grid) return;
+  if (title) title.textContent = conf.title;
+  grid.innerHTML = conf.items.map(s =>
+    `<div class="prompt" onclick="ask('${s.text.replace(/'/g,"\\'")}')">
+       <span class="ic">${s.ico}</span><span class="prompt-text">${escapeHTML(s.text)}</span>
+     </div>`
+  ).join('');
+}
+
+// Scheme buttons were removed — questions auto-route to the right scheme. selectCard is kept as a
+// harmless no-op so any leftover reference can't throw.
+function selectCard() { /* no scheme switching in the unified auto-router */ }
+
+// Render the unified mixed sample questions into the welcome prompt grid.
+function renderUnifiedSamples() {
+  const grid = document.getElementById('promptGrid');
+  const title = document.getElementById('promptsTitle');
+  const samples = (PRODUCTS.unified_auto && PRODUCTS.unified_auto.samples) || [];
+  if (title) title.textContent = 'Try a question';
+  if (!grid) return;
+  grid.innerHTML = samples.map(s =>
+    `<div class="prompt" onclick="ask('${s.text.replace(/'/g,"\\'")}')">
+       <span class="ic">${s.ico}</span><span class="prompt-text">${escapeHTML(s.text)}</span>
+     </div>`
+  ).join('');
+}
+
+/* ============ SEND ============ */
+// While a query is in flight, block ALL ways to start another one (Enter key,
+// sample-question clicks, double-clicks) — not just the Send button.
+let isQueryRunning = false;
+
+async function sendQuery() {
+  if (isQueryRunning) return;            // a question is already being answered — ignore
+  const q = inp.value.trim();
+  if (!q) return;
+  isQueryRunning = true;
+  pushRecent(q, currentProduct);
+  addMessage('user', q);
+  inp.value = '';
+  inp.style.height = 'auto';
+
+  const sendBtn = document.getElementById('sendBtn');
+  sendBtn.disabled = true;               // block only the SEND action — input stays typeable (like ChatGPT)
+  addTyping();
+
+  try {
+    const response = await fetchNLPResponse(q);
+    removeTyping();
+    if (response.answer) addBotRich(q, response);
+    else addMessage('bot', `Error: ${response.detail || 'Unable to process your query'}`);
+  } catch (err) {
+    removeTyping();
+    addMessage('bot', `Sorry, I encountered an error: ${err.message}`);
+    console.error('Query error:', err);
+  } finally {
+    isQueryRunning = false;
+    sendBtn.disabled = false;
+    inp.focus();
+  }
+}
+
+/* ============ VOICE INPUT (unchanged contract: /api/query/transcribe) ============ */
+let mediaRecorder = null, audioChunks = [], isRecording = false;
+const VOICE_LANG = { en: 'en-IN', kha: 'en-IN', gar: 'en-IN' };
+
+function toggleMic() { if (isRecording) { stopMic(); return; } startMic(); }
+
+async function startMic() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert('Microphone not supported in this browser. Please use Chrome, Edge, or Safari.'); return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    const prefer = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+    const picked = (window.MediaRecorder && MediaRecorder.isTypeSupported)
+      ? prefer.find(t => MediaRecorder.isTypeSupported(t)) : null;
+    mediaRecorder = picked ? new MediaRecorder(stream, { mimeType: picked }) : new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      const type = (mediaRecorder.mimeType || picked || 'audio/webm').split(';')[0];
+      const blob = new Blob(audioChunks, { type });
+      await sendAudioToGemini(blob);
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    const ov = document.getElementById('chatMicOverlay');
+    ov.classList.add('open'); ov.classList.remove('processing');
+    document.getElementById('chatMicLabel').innerHTML = 'Listening…<div class="mic-overlay-sub">Tap the mic or press Esc to stop</div>';
+  } catch (e) {
+    alert('Microphone permission denied. Please allow microphone access and try again.');
+  }
+}
+function stopMic() {
+  if (!isRecording) return;
+  isRecording = false;
+  const ov = document.getElementById('chatMicOverlay');
+  ov.classList.add('processing');
+  document.getElementById('chatMicLabel').innerHTML = 'Processing…<div class="mic-overlay-sub">Transcribing your voice</div>';
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+}
+async function sendAudioToGemini(blob) {
+  const ov  = document.getElementById('chatMicOverlay');
+  const lbl = document.getElementById('chatMicLabel');
+  if (blob.size > 5 * 1024 * 1024) {
+    lbl.innerHTML = 'Recording too long<div class="mic-overlay-sub">Please keep it under ~2 minutes</div>';
+    setTimeout(() => ov.classList.remove('open', 'processing'), 1800); return;
+  }
+  if (!blob || blob.size < 1200) {
+    lbl.innerHTML = 'No speech detected<div class="mic-overlay-sub">Hold the mic a bit longer and speak clearly</div>';
+    ov.classList.add('open'); setTimeout(() => ov.classList.remove('open', 'processing'), 1800); return;
+  }
+  const fail = (msg) => {
+    lbl.innerHTML = `Transcription failed<div class="mic-overlay-sub">${escapeHTML(msg || 'Please try again')}</div>`;
+    ov.classList.add('open'); setTimeout(() => ov.classList.remove('open', 'processing'), 2400);
+  };
+  const url = `${productBase()}/api/query/transcribe`;
+  try {
+    const form = new FormData();
+    const ext = (blob.type || 'audio/webm').includes('ogg') ? 'ogg' : (blob.type || '').includes('mp4') ? 'mp4' : 'webm';
+    form.append('audio', blob, `audio.${ext}`);
+    form.append('language', VOICE_LANG[currentLang] || 'en-IN');
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 60000);
+    let res;
+    try { res = await fetch(url, { method: 'POST', body: form, signal: ctrl.signal }); }
+    finally { clearTimeout(timer); }
+    let data = {};
+    try { data = await res.json(); } catch (_) {}
+    ov.classList.remove('open', 'processing');
+    if (res.ok && data && data.transcript) {
+      inp.value = data.transcript;
+      inp.style.height = 'auto';
+      inp.style.height = Math.min(inp.scrollHeight, 160) + 'px';
+      inp.focus();
+    } else {
+      fail(data && data.detail ? data.detail : `Server returned ${res.status}. Please try again.`);
+    }
+  } catch (e) {
+    const msg = e.name === 'AbortError' ? 'Timed out — please try a shorter recording'
+      : `Could not reach the server (${e.message}). Is the backend running on this port?`;
+    fail(msg);
+  }
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (isRecording) stopMic();
+  else document.getElementById('chatMicOverlay')?.classList.remove('open', 'processing');
+});
+
+/* ============ SESSION / AUTH (unchanged) ============ */
+function checkSession() {
+  sessionStorage.setItem('isLoggedIn', 'true');
+  sessionStorage.setItem('userEmail', 'user@meghalaya.gov.in');
+}
+function handleLogout(event) {
+  event.preventDefault();
+  sessionStorage.removeItem('isLoggedIn');
+  sessionStorage.removeItem('userEmail');
+  window.location.href = '/static/Meghalaya_UnifiedPortal_UI.html';
+}
+
+/* ============ SCHEME CARDS — LIVE STATS ============
+   Pulls the real headline numbers from the Focus backend (port 8200) using the
+   existing /api/query contract — no backend changes.
+   Focus and FOCUS+ are two DIFFERENT schemes, so each card reads its own
+   distinct result column by name (never "first numeric value") to avoid
+   conflating one scheme's figure with the other's. */
+function _firstNumber(resp) {
+  const d = resp && Array.isArray(resp.data) ? resp.data : null;
+  if (!d || !d.length) return null;
+  const row = d[0];
+  for (const k of Object.keys(row)) {
+    const v = parseFloat(row[k]);
+    if (!isNaN(v)) return v;
+  }
+  return null;
+}
+// Read a value strictly by the expected column key (case-insensitive substring).
+// Returns null (→ shows "—") if the response doesn't contain that column, so a
+// query that resolved to the wrong metric never leaks into the wrong card.
+function _numByKey(resp, keys) {
+  const d = resp && Array.isArray(resp.data) ? resp.data : null;
+  if (!d || !d.length) return null;
+  const row = d[0];
+  const want = (Array.isArray(keys) ? keys : [keys]).map(k => k.toLowerCase());
+  for (const col of Object.keys(row)) {
+    const lc = col.toLowerCase();
+    if (want.some(w => lc.includes(w))) {
+      const v = parseFloat(row[col]);
+      if (!isNaN(v)) return v;
+    }
+  }
+  return null;
+}
+function _fmtCr(n) {
+  // Compact form for the small dashboard stat tiles ONLY (space-constrained).
+  // Result-panel amounts are formatted by the backend in full Indian format with ₹.
+  if (n == null) return '—';
+  if (Math.abs(n) >= 1e7) return '₹' + (n / 1e7).toFixed(1) + ' Cr';
+  if (Math.abs(n) >= 1e5) return '₹' + (n / 1e5).toFixed(1) + ' L';
+  return '₹' + Number(n).toLocaleString('en-IN');
+}
+async function _askStat(base, question) {
+  try {
+    // Unique session per question so the parallel card queries never share
+    // conversation context / cache (which was making them all return one answer).
+    const sid = 'card_' + Math.random().toString(36).slice(2, 10);
+    const r = await fetch(`${base}/api/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, language: 'en', session_id: sid, include_sql: false })
+    });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) { return null; }
+}
+async function loadFocusCardStats() {
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.textContent = val; };
+  // Each question is verified against the live backend; each card reads its OWN
+  // distinct result column so the two schemes never share a number.
+  const focusBase = PRODUCTS.focus.base;            // Focus PG scheme (port 8200, focus_pg)
+  const fpBase    = PRODUCTS.focus_plus.base;        // FOCUS+ scheme (port 8000, Meghalaya_Chatbot)
+  const cmBase = PRODUCTS.cm_elevate.base;           // CM Elevate scheme (port 8100, cm_elevate)
+  const [pg, members, disb, ben, dist, paid, cmDisb] = await Promise.all([
+    _askStat(focusBase, 'How many Producer Groups are there in total?'),
+    _askStat(focusBase, 'How many PG members are registered overall?'),
+    _askStat(focusBase, 'Total tranche-1 disbursement.'),
+    _askStat(fpBase,    'How many FOCUS+ beneficiaries are there?'),
+    _askStat(fpBase,    'How many districts are there?'),
+    _askStat(fpBase,    'What is the total amount paid out?'),
+    _askStat(cmBase,    'What is the total disbursed amount?')
+  ]);
+
+  // --- Focus card (Producer Group scheme) ---
+  const pgN   = _numByKey(pg,      ['producer_group', 'total_pg', 'producer groups']);
+  const memN  = _numByKey(members, ['member']);
+  const disbN = _numByKey(disb,    ['tranche1', 'tranche_1', 'disburse']);
+  if (pgN   != null) set('focusStatPG', Number(pgN).toLocaleString('en-IN'));
+  if (memN  != null) set('focusStatMembers', Number(memN).toLocaleString('en-IN'));
+  if (disbN != null) set('focusStatDisb', _fmtCr(disbN));
+
+  // --- FOCUS+ card (beneficiary scheme — different metrics) ---
+  const benN  = _numByKey(ben,  ['beneficiar']);
+  const distN = _numByKey(dist, ['district']);
+  const paidN = _numByKey(paid, ['paid_out', 'amount_paid', 'paid']);
+  if (benN  != null) set('fpStatBen', Number(benN).toLocaleString('en-IN'));
+  if (distN != null) set('fpStatDist', Number(distN).toLocaleString('en-IN'));
+  if (paidN != null) set('fpStatPaid', _fmtCr(paidN));
+
+  // --- CM Elevate card (Disbursed = total_disbursement, not sanctioned) ---
+  const cmDisbN = _numByKey(cmDisb, ['disburs', 'total_disburs', 'amount']);
+  if (cmDisbN != null) set('cmStatDisb', _fmtCr(cmDisbN));
+
+  console.log('[card stats] focusBase =', focusBase, 'fpBase =', fpBase,
+    '| Focus: PG=', pgN, 'members=', memN, 'tranche1=', disbN,
+    '| FOCUS+: beneficiaries=', benN, 'districts=', distN, 'paidOut=', paidN);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkSession();
+  syncProductUI();
+  loadSampleQuestions();
+  showGreeting(false);
+  loadFocusCardStats();   // fill the overview cards with real backend numbers
+  renderUnifiedSamples(); // show the mixed quick-start questions
+});
+</script>
+
+</body>
+</html>

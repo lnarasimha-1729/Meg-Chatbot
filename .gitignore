@@ -1,0 +1,52 @@
+# Environment variables (secrets) — all projects
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Virtual environments
+myvenv/
+venv/
+env/
+.venv/
+**/myvenv/
+**/venv/
+**/.venv/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.mypy_cache/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials / secrets
+credentials/
+*.pem
+*.key
+
+# Logs
+*.log
+logs/
+
+# Nested Neural AI Governance project (excluded from this repo)
+NeuralAiGovernanceProject - Copy - Copy/
+ai_query.backup.html

@@ -1,0 +1,298 @@
+MEGH ONE AI — FOCUS PG NLP USE CASES
+Questions & Expected Answers
+======================================================================
+
+[UC-001]
+Q: How many Producer Groups (PGs) are registered under Focus?
+A: **37,354** PGs registered under the Focus scheme.
+
+----------------------------------------------------------------------
+
+[UC-002]
+Q: How many distinct PG names exist?
+A: **16,992** distinct PG names — some are reused across villages.
+
+----------------------------------------------------------------------
+
+[UC-003]
+Q: How many districts have Focus PGs?
+A: **12** districts covered.
+
+----------------------------------------------------------------------
+
+[UC-004]
+Q: How many blocks have Focus PGs?
+A: **47** blocks with at least one PG.
+
+----------------------------------------------------------------------
+
+[UC-005]
+Q: How many PG members are registered overall?
+A: **14,459** distinct members across all PGs (sparse — member detail is populated for only ~12% of PGs).
+
+----------------------------------------------------------------------
+
+[UC-006]
+Q: Top 5 districts by Focus PG count
+A: East Khasi Hills (13,360) · West Garo Hills (8,428) · South Garo Hills (2,863) · East Garo Hills (2,800) · Ri-Bhoi (1,799).
+
+----------------------------------------------------------------------
+
+[UC-007]
+Q: PGs by district
+A: Returns PG count per district.
+
+----------------------------------------------------------------------
+
+[UC-008]
+Q: How many Focus PGs in West Jaintia Hills?
+A: Filtered PG count for one district.
+
+----------------------------------------------------------------------
+
+[UC-009]
+Q: Top 10 blocks by Focus PG count
+A: Khatarshnong Laitkroh leads (4,371 PGs), then Mylliem, Mawryngkneng, Selsella, Dambo Rongjeng.
+
+----------------------------------------------------------------------
+
+[UC-010]
+Q: Districts with the lowest Focus PG coverage
+A: Bottom-N districts to flag for PG outreach.
+
+----------------------------------------------------------------------
+
+[UC-011]
+Q: How many PGs in Khatarshnong Laitkroh block?
+A: Single-block PG count.
+
+----------------------------------------------------------------------
+
+[UC-012]
+Q: Total Focus disbursement (tranche 1)
+A: **₹47.73 Cr** disbursed to **9,657** PGs in tranche 1 (~₹49k avg per PG).
+
+----------------------------------------------------------------------
+
+[UC-013]
+Q: How many PGs have received tranche 2?
+A: Only **10 PGs** have received the second disbursement (₹0.03 Cr total). The vast majority await tranche 2.
+
+----------------------------------------------------------------------
+
+[UC-014]
+Q: What % of PGs have received any disbursement?
+A: **~26%** of PGs (9,657 of 37,354) have received at least one tranche.
+
+----------------------------------------------------------------------
+
+[UC-015]
+Q: District-wise tranche 1 disbursement
+A: ₹ disbursed per district (tranche 1).
+
+----------------------------------------------------------------------
+
+[UC-016]
+Q: Average tranche 1 amount per PG
+A: Mean disbursement value among PGs that received tranche 1.
+
+----------------------------------------------------------------------
+
+[UC-017]
+Q: Top 10 PGs by tranche 1 disbursement
+A: Largest PGs by ₹ received.
+
+----------------------------------------------------------------------
+
+[UC-018]
+Q: PGs awaiting tranche 1 (no disbursement yet)
+A: List of PGs without finance_amount_disbursed populated.
+
+----------------------------------------------------------------------
+
+[UC-019]
+Q: Disbursement timeline by month
+A: Tranche-1 disbursement trend over time.
+
+----------------------------------------------------------------------
+
+[UC-020]
+Q: How many PGs have identified a bookkeeper?
+A: **6,753** PGs have a bookkeeper (Yes); **7,667** explicitly No; **22,932** unfilled — major data gap.
+
+----------------------------------------------------------------------
+
+[UC-021]
+Q: Bookkeeper coverage by district
+A: % PGs with bookkeeper per district — surface gaps for capacity building.
+
+----------------------------------------------------------------------
+
+[UC-022]
+Q: Districts where bookkeeper coverage is lowest
+A: Bottom-N districts by bookkeeper % — for training programme targeting.
+
+----------------------------------------------------------------------
+
+[UC-023]
+Q: Gender split of Focus PG members
+A: Where gender data is populated: **6,296 Male · 7,749 Female · 1 Other**. Female-majority (54%).
+
+----------------------------------------------------------------------
+
+[UC-024]
+Q: Average members per Focus PG
+A: Average across PGs that have member info populated.
+
+----------------------------------------------------------------------
+
+[UC-025]
+Q: Top 10 PGs by member count
+A: Largest PGs by number of enrolled members.
+
+----------------------------------------------------------------------
+
+[UC-026]
+Q: Member lookup by EPIC ID
+A: Returns the PG a member belongs to, plus PG profile.
+
+----------------------------------------------------------------------
+
+[UC-027]
+Q: How many PGs are linked to an IVCS?
+A: PGs with non-blank ivcs_name.
+
+----------------------------------------------------------------------
+
+[UC-028]
+Q: Top IVCS by PG linkage count
+A: Which IVCS hold the most Focus PGs.
+
+----------------------------------------------------------------------
+
+[UC-029]
+Q: How many PGs have a bank account?
+A: PGs with bank_account_no populated (excluding blanks).
+
+----------------------------------------------------------------------
+
+[UC-030]
+Q: Bank-wise split of Focus PGs
+A: Which banks hold the most PG accounts.
+
+----------------------------------------------------------------------
+
+[UC-031]
+Q: Top-3 districts' share of all Focus PGs
+A: How concentrated is the scheme geographically?
+
+----------------------------------------------------------------------
+
+[UC-032]
+Q: Top-3 blocks' share of all Focus PGs
+A: Block-level concentration risk.
+
+----------------------------------------------------------------------
+
+[UC-033]
+Q: How many PGs are missing bookkeeper info?
+A: **22,932** PGs (61%) have no bookkeeper Yes/No answer recorded.
+
+----------------------------------------------------------------------
+
+[UC-034]
+Q: How many PGs are missing district information?
+A: Count of PGs with blank district_name.
+
+----------------------------------------------------------------------
+
+[UC-035]
+Q: How many PGs are missing village info?
+A: Count of PGs with blank village_id.
+
+----------------------------------------------------------------------
+
+[UC-036]
+Q: Member age column has anomalies — count outliers
+A: Records with age <18 or >100 — likely data entry errors.
+
+----------------------------------------------------------------------
+
+[UC-037]
+Q: Run a Focus PG data-quality scorecard
+A: Summary table: % missing per column (bookkeeper, district, bank, EPIC, gender, age).
+
+----------------------------------------------------------------------
+
+[UC-038]
+Q: Focus PG members who are also FOCUS+ beneficiaries
+A: Joint membership via EPIC ID match.
+
+----------------------------------------------------------------------
+
+[UC-039]
+Q: Focus PG members who are also CM Assure farmers
+A: Cross-scheme overlap by EPIC.
+
+----------------------------------------------------------------------
+
+[UC-040]
+Q: Districts active in BOTH Focus PG and Floriculture
+A: Overlap of scheme presence at district level.
+
+----------------------------------------------------------------------
+
+[UC-041]
+Q: What is the Focus scheme?
+A: Focus is the Meghalaya state scheme for forming and financing Producer Groups (PGs). Each PG receives seed capital in tranches and is linked to an Integrated Village Cooperative Society (IVCS). It is distinct from FOCUS+ (Direct Benefit Transfer).
+
+----------------------------------------------------------------------
+
+[UC-042]
+Q: How is Focus different from FOCUS+?
+A: **Focus** = Producer Group formation + finance (37k PGs). **FOCUS+** = Direct Benefit Transfer (₹5,000/yr) to individual farmers (92k beneficiaries). Different schemes, different beneficiary lists.
+
+----------------------------------------------------------------------
+
+[UC-043]
+Q: What is a bookkeeper in the Focus scheme?
+A: Each PG is required to identify one member as bookkeeper — responsible for tracking PG receipts, expenses, and member contributions. Bookkeeper identification is a precondition for tranche-2 disbursement.
+
+----------------------------------------------------------------------
+
+[UC-044]
+Q: What is IVCS?
+A: Integrated Village Cooperative Society — the legal entity Focus PGs are nested under at village level. Acts as the financial conduit for tranche disbursements.
+
+----------------------------------------------------------------------
+
+[UC-045]
+Q: What are the Focus disbursement tranches?
+A: Tranche 1: initial seed capital (~₹49k avg). Tranche 2: follow-on disbursement, contingent on bookkeeper identification and tranche-1 utilisation report. Currently only 10 PGs have received tranche 2.
+
+----------------------------------------------------------------------
+
+[UC-046]
+Q: 1-page brief for Focus PGs in East Khasi Hills
+A: Returns PG count, bookkeeper %, disbursement total, top blocks, IVCS linkage rate.
+
+----------------------------------------------------------------------
+
+[UC-047]
+Q: Districts where tranche-2 readiness gap is biggest
+A: Districts with high tranche-1 % but low bookkeeper % — likely blocked on tranche-2 for capacity reasons.
+
+----------------------------------------------------------------------
+
+[UC-048]
+Q: PGs with member count > 10
+A: Larger PGs likely to deliver economies of scale.
+
+----------------------------------------------------------------------
+
+[UC-049]
+Q: PGs with bookkeeper but no disbursement yet
+A: Operationally ready but unfunded — should be prioritised.
+
+----------------------------------------------------------------------
+

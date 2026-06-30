@@ -1,0 +1,299 @@
+Category: Counts
+Input: How many beneficiaries are there in Focus+?
+Expected Answer: 93,286 beneficiaries.
+--------------------------------------------------------------------------------
+
+Category: Coverage
+Input: How many districts does Focus+ reach?
+Expected Answer: 12 districts.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in Selsella block?
+Expected Answer: 7,111 (West Garo Hills).
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in Nayagaon village?
+Expected Answer: 242 beneficiaries.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: Which bank serves the most beneficiaries?
+Expected Answer: State Bank of India (64,686).
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in West Garo Hills?
+Expected Answer: 34,720 beneficiaries in West Garo Hills.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in East Khasi Hills?
+Expected Answer: 12,214 beneficiaries in East Khasi Hills.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in East Garo Hills?
+Expected Answer: 9,775 beneficiaries in East Garo Hills.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in North Garo Hills?
+Expected Answer: 9,093 beneficiaries in North Garo Hills.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in South West Garo Hills?
+Expected Answer: 8,502 beneficiaries in South West Garo Hills.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in South Garo Hills?
+Expected Answer: 8,108 beneficiaries in South Garo Hills.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in West Khasi Hills?
+Expected Answer: 6,754 beneficiaries in West Khasi Hills.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in South West Khasi Hills?
+Expected Answer: 1,792 beneficiaries in South West Khasi Hills.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in Eastern West Khasi Hills?
+Expected Answer: 1,221 beneficiaries in Eastern West Khasi Hills.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in Ri Bhoi?
+Expected Answer: 419 beneficiaries in Ri Bhoi.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in East Jaintia Hills?
+Expected Answer: 404 beneficiaries in East Jaintia Hills.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in West Jaintia Hills?
+Expected Answer: 283 beneficiaries in West Jaintia Hills.
+--------------------------------------------------------------------------------
+
+Category: Ranking
+Input: Top 5 districts by beneficiaries
+Expected Answer: West Garo 34,720 · East Khasi 12,214 · East Garo 9,775 · North Garo 9,093 · SW Garo 8,502.
+--------------------------------------------------------------------------------
+
+Category: Ranking
+Input: Which district has the most beneficiaries?
+Expected Answer: West Garo Hills (34,720).
+--------------------------------------------------------------------------------
+
+Category: Ranking
+Input: Which district has the fewest beneficiaries?
+Expected Answer: West Jaintia Hills (283).
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: Bank-wise split of beneficiaries
+Expected Answer: SBI 69% · MRB 20% · Apex 7% · others 4%.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: What share of beneficiaries does SBI serve?
+Expected Answer: 69% (64,686 of 93,286).
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top 5 blocks by beneficiaries
+Expected Answer: Tikrikilla 7,126 · Selsella 7,111 · Zikzak 5,509 · Nongstoin 5,500 · Rongram 5,094.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top 5 villages by beneficiaries
+Expected Answer: Reservegittim 264 · Nayagaon 242 · Haripur 241 · Killapara 231 · Hallidayganj 228.
+--------------------------------------------------------------------------------
+
+Category: Filter
+Input: Which districts have more than 5,000 beneficiaries?
+Expected Answer: West Garo, East Khasi, East Garo, North Garo, SW Garo, South Garo, West Khasi.
+--------------------------------------------------------------------------------
+
+Category: Filter
+Input: Which districts have fewer than 1,000 beneficiaries?
+Expected Answer: SW Khasi, EW Khasi, Ri Bhoi, East Jaintia, West Jaintia.
+--------------------------------------------------------------------------------
+
+Category: Comparison
+Input: Compare West Garo Hills and East Khasi Hills
+Expected Answer: West Garo 34,720 ( ) vs East Khasi 12,214 ( ).
+--------------------------------------------------------------------------------
+
+Category: Share
+Input: What % of beneficiaries are in West Garo Hills?
+Expected Answer: 37% (34,720 of 93,286).
+--------------------------------------------------------------------------------
+
+Category: Ranking
+Input: Rank all districts by beneficiaries
+Expected Answer: Full ranking from West Garo (34,720) to West Jaintia (283).
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: How many beneficiaries do the top 3 banks cover?
+Expected Answer: 89,783 (96%).
+--------------------------------------------------------------------------------
+
+Category: Average
+Input: Average beneficiaries per district
+Expected Answer: ~7,774 (93,286 / 12).
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: How many beneficiaries in the Garo Hills region?
+Expected Answer: ~70,398 across the five Garo Hills districts.
+--------------------------------------------------------------------------------
+
+Category: Comparison
+Input: Compare the Garo Hills and Khasi Hills regions
+Expected Answer: Garo Hills ~70,398 vs Khasi Hills ~21,981 beneficiaries.
+--------------------------------------------------------------------------------
+
+Category: Ranking
+Input: Bottom 5 districts by beneficiaries
+Expected Answer: West Jaintia 283 · East Jaintia 404 · Ri Bhoi 419 · EW Khasi 1,221 · SW Khasi 1,792.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: What is Meghalaya Rural Bank's share?
+Expected Answer: 20% (18,807 of 93,286).
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top blocks in West Garo Hills by beneficiaries
+Expected Answer: Leading blocks in West Garo Hills ranked by beneficiaries.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top blocks in East Khasi Hills by beneficiaries
+Expected Answer: Leading blocks in East Khasi Hills ranked by beneficiaries.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top blocks in East Garo Hills by beneficiaries
+Expected Answer: Leading blocks in East Garo Hills ranked by beneficiaries.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top blocks in North Garo Hills by beneficiaries
+Expected Answer: Leading blocks in North Garo Hills ranked by beneficiaries.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top blocks in South West Garo Hills by beneficiaries
+Expected Answer: Leading blocks in South West Garo Hills ranked by beneficiaries.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top blocks in South Garo Hills by beneficiaries
+Expected Answer: Leading blocks in South Garo Hills ranked by beneficiaries.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: Bank-wise split in West Garo Hills?
+Expected Answer: Bank distribution of beneficiaries for West Garo Hills.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: Bank-wise split in East Khasi Hills?
+Expected Answer: Bank distribution of beneficiaries for East Khasi Hills.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: Bank-wise split in East Garo Hills?
+Expected Answer: Bank distribution of beneficiaries for East Garo Hills.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: Bank-wise split in North Garo Hills?
+Expected Answer: Bank distribution of beneficiaries for North Garo Hills.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: Bank-wise split in South West Garo Hills?
+Expected Answer: Bank distribution of beneficiaries for South West Garo Hills.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: Bank-wise split in South Garo Hills?
+Expected Answer: Bank distribution of beneficiaries for South Garo Hills.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: Which districts does State Bank of India serve most?
+Expected Answer: Top districts served by State Bank of India.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: Which districts does Meghalaya Rural Bank serve most?
+Expected Answer: Top districts served by Meghalaya Rural Bank.
+--------------------------------------------------------------------------------
+
+Category: Banks
+Input: Which districts does Central Bank of India serve most?
+Expected Answer: Top districts served by Central Bank of India.
+--------------------------------------------------------------------------------
+
+Category: Data Quality
+Input: How many beneficiaries have no mobile number?
+Expected Answer: 46,217 of 93,286 (~50%).
+--------------------------------------------------------------------------------
+
+Category: Average
+Input: Average beneficiaries per village
+Expected Answer: Mean beneficiaries per village across the state.
+--------------------------------------------------------------------------------
+
+Category: Coverage
+Input: Which villages have only one beneficiary?
+Expected Answer: List of single-beneficiary villages (coverage gaps).
+--------------------------------------------------------------------------------
+
+Category: Ranking
+Input: Which districts is SBI NOT the top bank in?
+Expected Answer: Districts where another bank leads disbursement.
+--------------------------------------------------------------------------------
+
+Category: Coverage
+Input: Districts with the lowest beneficiary density
+Expected Answer: Ri Bhoi, East Jaintia, West Jaintia have the fewest.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top villages in West Garo Hills by beneficiaries
+Expected Answer: Leading villages in West Garo Hills by beneficiary count.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top villages in East Khasi Hills by beneficiaries
+Expected Answer: Leading villages in East Khasi Hills by beneficiary count.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top villages in East Garo Hills by beneficiaries
+Expected Answer: Leading villages in East Garo Hills by beneficiary count.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top villages in North Garo Hills by beneficiaries
+Expected Answer: Leading villages in North Garo Hills by beneficiary count.
+--------------------------------------------------------------------------------
+
+Category: Geography
+Input: Top villages in South West Garo Hills by beneficiaries
+Expected Answer: Leading villages in South West Garo Hills by beneficiary count.
+--------------------------------------------------------------------------------
